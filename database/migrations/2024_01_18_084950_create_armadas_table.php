@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('armadas', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('jenis_armada_id');
             $table->string('nomor')->unique();
-            $table->string('jenis');
-            $table->char('ketersediaan', 1)->comment('0:tdk tersedian 1:tersedian');
+            $table->integer('kapasitas')->default(0)->comment('satuan kg');
+            $table->char('ketersediaan', 1)->comment('0:tdk tersedia 1:tersedia');
             $table->timestamps();
         });
     }

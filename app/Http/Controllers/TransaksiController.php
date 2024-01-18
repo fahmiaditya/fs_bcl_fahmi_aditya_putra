@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Barang;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 
-class BarangController extends Controller
+class TransaksiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class BarangController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Barang $barang)
+    public function show(Transaksi $transaksi)
     {
         //
     }
@@ -42,7 +42,7 @@ class BarangController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Barang $barang)
+    public function edit(Transaksi $transaksi)
     {
         //
     }
@@ -50,7 +50,7 @@ class BarangController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Barang $barang)
+    public function update(Request $request, Transaksi $transaksi)
     {
         //
     }
@@ -58,7 +58,7 @@ class BarangController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Barang $barang)
+    public function destroy(Transaksi $transaksi)
     {
         //
     }

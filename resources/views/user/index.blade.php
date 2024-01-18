@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Armada')
+@section('title', 'User')
 @section('content')
 <div class="content">
     <!-- Start Content-->
@@ -29,13 +29,23 @@
                                 <div class="col-md-3">
                                     <div id="group_button" class="mb-3">
                                         <x-backend.btn-index>
-                                            <x-slot name="entity">armada</x-slot>
+                                            <x-slot name="entity">users</x-slot>
                                         </x-backend.btn-index>
                                     </div>
                                     <div id="group_search" class="mb-3">
                                         <x-backend.search>
-                                            <x-slot name="route">{{ route('armada.load-data') }}</x-slot>
+                                            <x-slot name="route">{{ route('users.load-data') }}</x-slot>
                                         </x-backend.search>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h5 class="card-title text-secondary text-center">Hak Akses</h5>
+                                                <input hidden type="text" name="url_role_filter" id="url_role_filter" value="{{ route('users.load-role') }}">
+                                                <div class="mb-2 filter-role">
+                                                    <select class="form-control" id="filter_role" name="filter_role" data-toggle="select2" data-width="100%">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-9">
@@ -50,8 +60,11 @@
                                                         </div>
                                                     </th>
                                                     <th>No</th>
-                                                    <th>Name</th>
-                                                    <th>Action</th>
+                                                    <th>Nama</th>
+                                                    <th>Username</th>
+                                                    <th>Email</th>
+                                                    <th>Status</th>
+                                                    <th>Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -62,7 +75,7 @@
                                 </div>
                             </div>
                         </section>
-                        @include('armada.proses')
+                        @include('user.proses')
                     </div>
                 </div> <!-- end card -->
             </div> <!-- end col -->
@@ -80,8 +93,11 @@
 @section('script-template')
     <!-- Plugin js-->
     <script src="{{ asset('backend/assets/libs/admin-resources/rwd-table/rwd-table.min.js') }}"></script>
+
+    <!-- Init js -->
+    <script src="{{ asset('backend/assets/js/pages/responsive-table.init.js') }}"></script>
 @endsection
 
 @section('script-custom')
-    <script src="{{ asset('backend/assets/js/custom/armada-module.js') }}"></script>
+    <script src="{{ asset('backend/custom/user-module.js') }}"></script>
 @endsection

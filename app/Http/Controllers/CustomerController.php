@@ -3,63 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Authorizable;
 use Illuminate\Http\Request;
+use App\Services\CustomerService;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use Authorizable;
+    protected $customerService;
+
+    public function __construct(CustomerService $customerService)
+    {
+        $this->customerService = $customerService;    
+    }
+    // ================ DEFAULT LARAVEL ================ //
     public function index()
     {
-        //
+        return view('customer.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        return $this->customerService->store($request);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Customer $customer)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Customer $customer)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Customer $customer)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Customer $customer)
     {
         //
+    }
+    // ================ END DEFAULT LARAVEL ================ //
+
+    public function loadData(Request $request)
+    {
+        return $this->customerService->viewData($request);
+    }
+
+    public function delete(Request $request)
+    {
+        return $this->customerService->delete($request);
     }
 }
