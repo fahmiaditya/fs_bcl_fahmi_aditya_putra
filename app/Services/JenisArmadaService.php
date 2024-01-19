@@ -194,6 +194,18 @@ class JenisArmadaService
         return $data;
     }
 
+    public function viewCombobox()
+    {
+        $data = $this->jenisArmadaRepository->getDataAll();
+
+        $output = '<option value="">Select Category</option>';
+        foreach ($data as $item) {
+            $output .= '<option value="'.$item->id.'">'.$item->nama.'</option>';
+        }
+
+        return $output;
+    }
+
     /* ==========================================================================================================
     ------------------------------------------- MEMPROSES DATA KE DB --------------------------------------------
     ===========================================================================================================*/

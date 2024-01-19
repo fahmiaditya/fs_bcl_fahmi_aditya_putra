@@ -3,63 +3,69 @@
 namespace App\Http\Controllers;
 
 use App\Models\Armada;
+use App\Models\Authorizable;
 use Illuminate\Http\Request;
+use App\Services\ArmadaService;
+use App\Services\JenisArmadaService;
 
 class ArmadaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use Authorizable;
+    protected $armadaService, $jenisArmadaService;
+
+    public function __construct(ArmadaService $armadaService, JenisArmadaService $jenisArmadaService)
+    {
+        $this->armadaService      = $armadaService;
+        $this->jenisArmadaService = $jenisArmadaService;
+    }
+
+    // ================ DEFAULT LARAVEL ================ //
     public function index()
     {
-        //
+        return view('armada.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return $this->jenisArmadaService->viewCombobox();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        return $this->armadaService->store($request);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Armada $armada)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Armada $armada)
+    public function edit($id)
     {
-        //
+        return [
+            'jenis' => $this->jenisArmadaService->viewCombobox(),
+            'data'  => $this->armadaService->getDataById($id),
+        ];
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Armada $armada)
+    public function update(Request $request, $id)
     {
-        //
+        return $this->armadaService->update($request, $id);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Armada $armada)
     {
         //
+    }
+    // ================ END DEFAULT LARAVEL ================ //
+
+    public function loadData(Request $request)
+    {
+        return $this->armadaService->viewData($request);
+    }
+
+    public function delete(Request $request)
+    {
+        return $this->armadaService->delete($request);
     }
 }

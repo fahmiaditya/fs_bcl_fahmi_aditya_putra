@@ -7,28 +7,12 @@ var count_page   = 0;
 /* ==========================================================================================================
 ------------------------------------------------- LAIN-LAIN -------------------------------------------------
 ===========================================================================================================*/
-modul_layout.find('#search').attr('placeholder', 'Nama, Alamat, Telepon, Email, Username');
+modul_layout.find('#search').attr('placeholder', 'Nomor');
 
 modul_layout.find('#sort_field').append(
     $('<option>', {
-        value: 'customers.nama',
-        text: 'Nama'
-    }),
-    $('<option>', {
-        value: 'customers.alamat',
-        text: 'Alamat'
-    }),
-    $('<option>', {
-        value: 'customers.telepon',
-        text: 'Telepon'
-    }),
-    $('<option>', {
-        value: 'users.username',
-        text: 'Username'
-    }),
-    $('<option>', {
-        value: 'users.email',
-        text: 'Email'
+        value: 'nomor',
+        text: 'Nomor'
     }),
 );
 
@@ -38,8 +22,8 @@ function formIndex(tipe) {
         resetForm();
 
         // DEFAULT INDEX
-        $('#limo-title').html('Data Pelanggan');
-        $('#limo-breadcrumb').html('Data Pelanggan');
+        $('#limo-title').html('Data Armada');
+        $('#limo-breadcrumb').html('Data Armada');
         $('section#limo-index').attr('hidden', false);
         $('section#limo-proses').attr('hidden', true);
         // END DEFAULT INDEX
@@ -51,27 +35,25 @@ function formIndex(tipe) {
     } else {
         if (tipe == 1) {
             // DEFAULT INDEX
-            $('#limo-title').html('Tambah Pelanggan');
-            $('#limo-breadcrumb').html('Tambah Pelanggan');
+            $('#limo-title').html('Tambah Armada');
+            $('#limo-breadcrumb').html('Tambah Armada');
             modul_proses.find('#limo-btn-simpan').attr('hidden', false);
             modul_proses.find('#limo-btn-ubah').attr('hidden', true);
             // END DEFAULT INDEX
 
             // EVENT FORM PROSES
                 // jika ada event di form proses
-                modul_proses.find('#group-password').attr('hidden', false);
             // END EVENT FORM PROSES
         } else {
             // DEFAULT INDEX
-            $('#limo-title').html('Ubah Pelanggan');
-            $('#limo-breadcrumb').html('Ubah Pelanggan');
+            $('#limo-title').html('Ubah Armada');
+            $('#limo-breadcrumb').html('Ubah Armada');
             modul_proses.find('#limo-btn-simpan').attr('hidden', true);
             modul_proses.find('#limo-btn-ubah').attr('hidden', false);
             // END DEFAULT INDEX
 
             // EVENT FORM PROSES
                 // jika ada event di form proses
-                modul_proses.find('#group-password').attr('hidden', true);
             // END EVENT FORM PROSES
         }
 
@@ -85,12 +67,9 @@ function formIndex(tipe) {
 function resetForm() {
     // FORM PROSES
     modul_proses.find('#nama').val('');
-    modul_proses.find('#alamat').val('');
-    modul_proses.find('#telepon').val('');
-    modul_proses.find('#username').val('');
-    modul_proses.find('#email').val('');
-    modul_proses.find('#password').val('');
-    modul_proses.find('#password_confirmation').val('');
+    modul_proses.find('#nomor').val('');
+    modul_proses.find('#kapasitas').val(0);
+    modul_proses.find('[name="ketersediaan"][value="1"]').prop('checked', true);
     // END FORM PROSES
 
     // DEFAULT
@@ -127,6 +106,10 @@ modul_layout.find('#search').on('keyup', function (e) {
 $('body').on('click', '.pagination a', function(e) {
     var url = $(this).attr('data-link');
     loadData(url);
+});
+
+modul_layout.find('#filter_ketersediaan').on('change', function (e) {
+    loadData(url_first);
 });
 
 /* ==========================================================================================================
@@ -180,6 +163,7 @@ function create(url) {
         url : url
     }).done(function (resp) {
         // console.log(resp);
+        modul_proses.find('#jenis').html(resp);
 
         formIndex(1);
     }).fail(function (e) {
@@ -256,12 +240,13 @@ function edit(url) {
         url : url
     }).done(function (resp) {
         // console.log(resp);
-        updated_id = resp.key; // default update
-        modul_proses.find('#nama').val(resp.nama);
-        modul_proses.find('#alamat').val(resp.alamat);
-        modul_proses.find('#telepon').val(resp.telepon);
-        modul_proses.find('#username').val(resp.username);
-        modul_proses.find('#email').val(resp.email);
+        modul_proses.find('#jenis').html(resp.jenis);
+
+        updated_id = resp.data.key; // default update
+        modul_proses.find('#nomor').val(resp.data.nomor);
+        modul_proses.find('#jenis').val(resp.data.jenis_armada_id);
+        modul_proses.find('#kapasitas').val(resp.data.kapasitas);
+        modul_proses.find('[name="ketersediaan"][value="'+resp.data.ketersediaan+'"]').prop('checked', true);
 
         formIndex(2);
     }).fail(function (e) {

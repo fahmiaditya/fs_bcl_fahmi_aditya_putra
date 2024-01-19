@@ -16,6 +16,7 @@ class CustomerController extends Controller
     {
         $this->customerService = $customerService;    
     }
+    
     // ================ DEFAULT LARAVEL ================ //
     public function index()
     {
@@ -37,14 +38,14 @@ class CustomerController extends Controller
         //
     }
 
-    public function edit(Customer $customer)
+    public function edit($id)
     {
-        //
+        return $this->customerService->getDataById($id);
     }
 
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, $id)
     {
-        //
+        return $this->customerService->update($request, $id);
     }
 
     public function destroy(Customer $customer)

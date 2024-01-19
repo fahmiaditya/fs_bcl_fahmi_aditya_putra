@@ -17,6 +17,11 @@ class JenisArmadaRepository
                     ->paginate($request->per_page);
     }
 
+    public function getDataAll()
+    {
+        return JenisArmada::all();
+    }
+
     public function getDataById($id)
     {
         return JenisArmada::find($id);

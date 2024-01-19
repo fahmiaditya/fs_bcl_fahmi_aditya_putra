@@ -29,7 +29,9 @@
                                 @can('view_customer')
                                     <a href="{{ route('customer.index') }}" class="dropdown-item">Customer</a>
                                 @endcan
-                                <a href="#" class="dropdown-item">Armada</a>
+                                @can('view_armada')
+                                    <a href="{{ route('armada.index') }}" class="dropdown-item">Armada</a>
+                                @endcan
                             </div>
                         </li>
                     @endcanany

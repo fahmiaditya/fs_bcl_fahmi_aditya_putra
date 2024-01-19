@@ -5,16 +5,16 @@ namespace App\Services;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
-use App\Repositories\CustomerRepository;
+use App\Repositories\ArmadaRepository;
 use Illuminate\Support\Facades\Validator;
 
-class CustomerService
+class ArmadaService
 {
-    protected $customerRepository;
+    protected $armadaRepository;
 
-    public function __construct(CustomerRepository $customerRepository)
+    public function __construct(ArmadaRepository $armadaRepository)
     {
-        $this->customerRepository = $customerRepository;    
+        $this->armadaRepository = $armadaRepository;    
     }
 
     /* ==========================================================================================================
@@ -22,7 +22,7 @@ class CustomerService
     ===========================================================================================================*/
     public function viewData($request)
     {
-        $data       = $this->customerRepository->getDataView($request);
+        $data       = $this->armadaRepository->getDataView($request);
         $item_table = $this->itemTable($data);
         $pagination = $this->pagination($data, 0);
 
@@ -38,12 +38,14 @@ class CustomerService
         $item_table = null;
         if (count($data->items()) > 0) {
             foreach ($data as $key => $item) {
-                $parameter  = Crypt::encrypt($item->id);
-                $url_update = $this->itemFormatOnClick(route('customer.update', $parameter).'/edit');
+                $parameter    = Crypt::encrypt($item->id);
+                $url_update   = $this->itemFormatOnClick(route('armada.update', $parameter).'/edit');
+                $ketersediaan = $item->ketersediaan == 1 ? '<span class="badge badge-outline-success rounded-pill">Tersedia</span>' 
+                                    : '<span class="badge badge-outline-danger rounded-pill">Tidak Tersedia</span>';
 
                 // PENGECEKAN HAK AKSES EDIT DI IZINKAN
                 $btn_update = '-';
-                if (Auth()->user()->can('edit_customer')) {
+                if (Auth()->user()->can('edit_armada')) {
                     $btn_update = '<button onclick="edit('.$url_update.')" class="btn btn-success btn-sm btn-ubah">Ubah</button>';
                 }
 
@@ -55,11 +57,10 @@ class CustomerService
                             </div>
                         </td>
                         <td>'.$data->firstItem() + $key.'</td>
-                        <td>'.$item->nama.'</td>
-                        <td>'.$item->username.'</td>
-                        <td>'.$item->email.'</td>
-                        <td>'.$item->alamat.'</td>
-                        <td>'.$item->telepon.'</td>
+                        <td>'.$item->jenisArmada->nama.'</td>
+                        <td>'.$item->nomor.'</td>
+                        <td>'.number_format($item->kapasitas, 0, ",", ".").'</td>
+                        <td>'.$ketersediaan.'</td>
                         <td>
                             '.$btn_update.'
                         </td>
@@ -192,7 +193,7 @@ class CustomerService
     public function getDataById($id)
     {
         $data_id     = Crypt::decrypt($id);
-        $data        = $this->customerRepository->getDataById($data_id);
+        $data        = $this->armadaRepository->getDataById($data_id);
         $data['key'] = $id;
 
         return $data;
@@ -201,22 +202,20 @@ class CustomerService
     /* ==========================================================================================================
     ------------------------------------------- MEMPROSES DATA KE DB --------------------------------------------
     ===========================================================================================================*/
+
     public function store($request)
     {
         $rules = [];
-        $rules['nama']     = 'required|min:2';
-        $rules['alamat']   = 'required|min:2';
-        $rules['telepon']  = 'required|min:2';
-        $rules['username'] = 'required|min:2|unique:users,username';
-        $rules['email']    = 'required|email|unique:users';
-        $rules['password'] = 'required|confirmed|min:6';
+        $rules['nomor']     = 'required|min:2|unique:armadas,nomor';
+        $rules['jenis']     = 'required';
+        $rules['kapasitas'] = 'required|numeric|min:1';
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->passes()) {
             DB::beginTransaction();
             try {
-                $this->customerRepository->store($request);
+                $this->armadaRepository->store($request);
                 DB::commit();
                 return ['result' => Response::HTTP_CREATED];
             } catch (\Exception $e) {
@@ -233,18 +232,12 @@ class CustomerService
     public function update($request, $id)
     {
         $rules = [];
-        $rules['nama']     = 'required|min:2';
-        $rules['alamat']   = 'required|min:2';
-        $rules['telepon']  = 'required|min:2';
+        $rules['jenis']     = 'required';
+        $rules['kapasitas'] = 'required|numeric|min:1';
         
-        $id       = Crypt::decrypt($id);
-        $customer = $this->customerRepository->getDataById($id);
-        if ($customer->username != $request->username) {
-            $rules['username'] = 'required|min:2|unique:users,username';
-        }
-
-        if ($customer->email != $request->email) {
-            $rules['email']    = 'required|email|unique:users';
+        $id = Crypt::decrypt($id);
+        if ($this->armadaRepository->getDataById($id)->nomor != $request->nomor) {
+            $rules['nomor'] = 'required|min:2|unique:armadas,nomor';
         }
 
         $validator = Validator::make($request->all(), $rules);
@@ -252,7 +245,7 @@ class CustomerService
         if ($validator->passes()) {
             DB::beginTransaction();
             try {
-                $this->customerRepository->update($request, $id);
+                $this->armadaRepository->update($request, $id);
                 DB::commit();
                 return ['result' => Response::HTTP_CREATED];
             } catch (\Exception $e) {
@@ -272,7 +265,7 @@ class CustomerService
         try {
             foreach ($request->id as $item_id) {
                 $id = Crypt::decrypt($item_id);
-                $this->customerRepository->delete($id);
+                $this->armadaRepository->delete($id);
             }
 
             DB::commit();

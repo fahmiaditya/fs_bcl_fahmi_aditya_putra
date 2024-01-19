@@ -26,7 +26,8 @@ class CustomerRepository
 
     public function getDataById($id)
     {
-        return Customer::find($id);
+        return Customer::select('customers.*', 'users.username', 'users.email')
+                    ->join('users', 'users.id', 'customers.user_id')->find($id);
     }
 
     public function store($request)
@@ -50,15 +51,22 @@ class CustomerRepository
 
     public function update($request, $id)
     {
-        Customer::where('id', $id)->update([
-            'nama'    => $request->nama,
-            'alamat'  => $request->alamat,
-            'telepon' => $request->telepon,
+        $customer          = Customer::find($id);
+        $customer->nama    = $request->nama;
+        $customer->alamat  = $request->alamat;
+        $customer->telepon = $request->telepon;
+        $customer->save();
+
+        User::where('id', $customer->user_id)->update([
+            'name'     => $request->nama,
+            'username' => trim($request->username),
+            'email'    => $request->email,
         ]);
     }
 
     public function delete($id)
     {
-        Customer::destroy($id);
+        $customer = Customer::find($id);
+        User::destroy($customer->user_id);
     }
 }
