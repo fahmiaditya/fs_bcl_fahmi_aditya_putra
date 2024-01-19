@@ -2,19 +2,22 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
-use App\Repositories\CustomerRepository;
+use App\Repositories\ArmadaRepository;
+use App\Repositories\TransaksiRepository;
 use Illuminate\Support\Facades\Validator;
 
-class CustomerService
+class TransaksiService
 {
-    protected $customerRepository;
+    protected $transaksiRepository, $armadaRepository;
 
-    public function __construct(CustomerRepository $customerRepository)
+    public function __construct(TransaksiRepository $transaksiRepository, ArmadaRepository $armadaRepository)
     {
-        $this->customerRepository = $customerRepository;    
+        $this->transaksiRepository = $transaksiRepository;    
+        $this->armadaRepository    = $armadaRepository;
     }
 
     /* ==========================================================================================================
@@ -22,7 +25,7 @@ class CustomerService
     ===========================================================================================================*/
     public function viewData($request)
     {
-        $data       = $this->customerRepository->getDataView($request);
+        $data       = $this->transaksiRepository->getDataView($request);
         $item_table = $this->itemTable($data);
         $pagination = $this->pagination($data, 0);
 
@@ -38,13 +41,26 @@ class CustomerService
         $item_table = null;
         if (count($data->items()) > 0) {
             foreach ($data as $key => $item) {
-                $parameter  = Crypt::encrypt($item->id);
-                $url_update = $this->itemFormatOnClick(route('customer.update', $parameter).'/edit');
+                $parameter    = Crypt::encrypt($item->id);
+                $url_update   = $this->itemFormatOnClick(route('transaksi.update', $parameter).'/edit');
+                
+                if ($item->status_pengiriman == 0) {
+                    $status = '<span class="badge badge-outline-danger rounded-pill">Tertunda</span>';
+                } elseif ($item->status_pengiriman == 1) {
+                    $status = '<span class="badge badge-outline-warning rounded-pill">Dalam Perjalanan</span>';
+                } else {
+                    $status = '<span class="badge badge-outline-success rounded-pill">Telah Tiba</span>';
+                }
 
                 // PENGECEKAN HAK AKSES EDIT DI IZINKAN
                 $btn_update = '-';
-                if (Auth()->user()->can('edit_customer')) {
+                if (Auth()->user()->can('edit_transaksi')) {
                     $btn_update = '<button onclick="edit('.$url_update.')" class="btn btn-success btn-sm btn-ubah">Ubah</button>';
+                }
+
+                $btn_pengiriman = '';
+                if (Auth()->user()->hasRole('Super Admin|Admin')) {
+                    $btn_pengiriman = '<button class="btn btn-primary btn-sm btn-ubah mt-1">Pengiriman</button>';
                 }
 
                 $item_table .=
@@ -55,18 +71,21 @@ class CustomerService
                             </div>
                         </td>
                         <td>'.$data->firstItem() + $key.'</td>
-                        <td>'.$item->nama.'</td>
-                        <td>'.$item->username.'</td>
-                        <td>'.$item->email.'</td>
-                        <td>'.$item->alamat.'</td>
-                        <td>'.$item->telepon.'</td>
+                        <td>'.$item->kode.'</td>
+                        <td>'.$item->customer->nama.'</td>
+                        <td>'.$item->armada->jenis_armada.' | <b>'.$item->armada->nomor.'</b></td>
+                        <td>'.$item->lokasi_asal.'</td>
+                        <td>'.$item->lokasi_tujuan.'</td>
+                        <td>'.$status.'</td>
+                        <td>-</td>
                         <td>
                             '.$btn_update.'
+                            '.$btn_pengiriman.'
                         </td>
                     </tr>';
             }
         } else {
-            $item_table = '<tr><td class="border px-4 py-2 text-center" colspan="8">Empty data</td></tr>';
+            $item_table = '<tr><td class="border px-4 py-2 text-center" colspan="12">Empty data</td></tr>';
         }
 
         return $item_table;
@@ -192,23 +211,37 @@ class CustomerService
     public function getDataById($id)
     {
         $data_id     = Crypt::decrypt($id);
-        $data        = $this->customerRepository->getDataById($data_id);
+        $data        = $this->armadaRepository->getDataById($data_id);
         $data['key'] = $id;
 
         return $data;
     }
 
-    public function viewCombobox($all)
+    public function makeCode()
     {
-        // NOTE ALL 0:TIDAK PAKAI ALL 1:PAKAI ALL
-        $data = $this->customerRepository->getDataAll();
+        // MEMBUAT CODE
+        $date   = Carbon::now();
+        $prefix = "TR";
+        $infix  = $date->format('Ymd');
+        $temp   = $this->transaksiRepository->code($infix);
 
-        $output = $all == 0 ? '<option value="">Pilih Customer</option>' : '<option value="All">Semua</option>';
-        foreach ($data as $item) {
-            $output .= '<option value="'.$item->id.'">'.$item->nama.'</option>';
+        if ($temp) {
+            $id = substr($temp->kode,11,4) + 1;
+
+            if( $id < 10){
+                $code = $prefix.$infix."000".$id;
+            }elseif( $id < 100){
+                $code = $prefix.$infix."00".$id;
+            }elseif( $id < 1000){
+                $code = $prefix.$infix."0".$id;
+            }else{
+                $code = $prefix.$infix.$id;
+            }
+        } else {
+            $code = $prefix.$infix."0001";
         }
 
-        return $output;
+        return $code;
     }
 
     /* ==========================================================================================================
@@ -217,19 +250,26 @@ class CustomerService
     public function store($request)
     {
         $rules = [];
-        $rules['nama']     = 'required|min:2';
-        $rules['alamat']   = 'required|min:2';
-        $rules['telepon']  = 'required|min:2';
-        $rules['username'] = 'required|min:2|unique:users,username';
-        $rules['email']    = 'required|email|unique:users';
-        $rules['password'] = 'required|confirmed|min:6';
+        $rules['armada']        = 'required';
+        $rules['barang']        = 'required|array|min:1';
+        $rules['barang.*']      = 'required';
+        $rules['muatan']        = 'required|array|min:1';
+        $rules['muatan.*']      = 'required';
+        $rules['lokasi_asal']   = 'required';
+        $rules['lokasi_tujuan'] = 'required';
+
+        if (Auth()->user()->hasRole('Super Admin|Admin')) {
+            $rules['customer'] = 'required';
+        }
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->passes()) {
             DB::beginTransaction();
             try {
-                $this->customerRepository->store($request);
+                $this->transaksiRepository->store($request);
+                $this->armadaRepository->updateKetersediaan($request->armada_id, 0);
+                
                 DB::commit();
                 return ['result' => Response::HTTP_CREATED];
             } catch (\Exception $e) {
@@ -241,58 +281,5 @@ class CustomerService
         return [
             'error' => $validator->errors(),
         ];
-    }
-
-    public function update($request, $id)
-    {
-        $rules = [];
-        $rules['nama']     = 'required|min:2';
-        $rules['alamat']   = 'required|min:2';
-        $rules['telepon']  = 'required|min:2';
-        
-        $id       = Crypt::decrypt($id);
-        $customer = $this->customerRepository->getDataById($id);
-        if ($customer->username != $request->username) {
-            $rules['username'] = 'required|min:2|unique:users,username';
-        }
-
-        if ($customer->email != $request->email) {
-            $rules['email']    = 'required|email|unique:users';
-        }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->passes()) {
-            DB::beginTransaction();
-            try {
-                $this->customerRepository->update($request, $id);
-                DB::commit();
-                return ['result' => Response::HTTP_CREATED];
-            } catch (\Exception $e) {
-                DB::rollback();
-                throw $e;
-            }
-        }
-
-        return [
-            'error' => $validator->errors(),
-        ];
-    }
-
-    public function delete($request)
-    {
-        DB::beginTransaction();
-        try {
-            foreach ($request->id as $item_id) {
-                $id = Crypt::decrypt($item_id);
-                $this->customerRepository->delete($id);
-            }
-
-            DB::commit();
-            return ['result' => Response::HTTP_OK];
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
     }
 }

@@ -36,15 +36,19 @@
                         </li>
                     @endcanany
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="mdi mdi-lifebuoy me-1"></i> Manage <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            <a href="#" class="dropdown-item">Transaksi</a>
-                        </div>
-                    </li>
+                    @canany(['view_transaksi'])
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="mdi mdi-lifebuoy me-1"></i> Manage <div class="arrow-down"></div>
+                            </a>
+                            @can('view_transaksi')
+                                <div class="dropdown-menu" aria-labelledby="topnav-components">
+                                    <a href="{{ route('transaksi.index') }}" class="dropdown-item">Transaksi</a>
+                                </div>
+                            @endcan
+                        </li>
+                    @endcanany
                 </ul> <!-- end navbar-->
             </div> <!-- end .collapsed-->
         </nav>

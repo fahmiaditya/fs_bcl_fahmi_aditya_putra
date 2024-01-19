@@ -19,6 +19,18 @@ class ArmadaRepository
                     ->paginate($request->per_page);
     }
 
+    public function getDataViewModal($request)
+    {
+        $search = $request->modal_search;
+        $data   = Armada::where(function($s) use ($search) {
+                        $s->where('nomor', 'like', '%'.$search.'%');
+                    })->with('jenisArmada')->where('ketersediaan', 1);
+
+        $request->modal_jenis != 'All' ? $data->where('jenis_armada_id', $request->modal_jenis) : '';
+
+        return $data->paginate(10);
+    }
+
     public function getDataById($id)
     {
         return Armada::with('jenisArmada')->find($id);
@@ -47,5 +59,12 @@ class ArmadaRepository
     public function delete($id)
     {
         Armada::destroy($id);
+    }
+
+    public function updateKetersediaan($id, $value)
+    {
+        Armada::find($id)->update([
+            'ketersediaan' => $value,
+        ]);
     }
 }

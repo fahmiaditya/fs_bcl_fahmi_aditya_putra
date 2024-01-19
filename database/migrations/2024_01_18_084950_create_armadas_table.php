@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('jenis_armada_id');
             $table->string('nomor')->unique();
-            $table->integer('kapasitas')->default(0)->comment('satuan kg');
+            $table->integer('kapasitas')->default(0);
             $table->char('ketersediaan', 1)->default(1)->comment('0:tdk tersedia 1:tersedia');
             $table->timestamps();
         });

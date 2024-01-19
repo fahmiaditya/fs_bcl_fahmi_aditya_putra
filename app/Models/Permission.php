@@ -36,6 +36,11 @@ class Permission extends \Spatie\Permission\Models\Permission
             'add_customer',
             'edit_customer',
             'delete_customer',
+
+            'view_transaksi',
+            'add_transaksi',
+            'edit_transaksi',
+            'delete_transaksi',
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Customer;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Permission;
@@ -56,6 +57,8 @@ class DatabaseSeeder extends Seeder
                     // assign all permissions
                     $role->syncPermissions(Permission::all());
                     $this->command->info('Kadep granted all the permissions');
+                } elseif ($role->name == 'Customer') {
+                    $role->syncPermissions(Permission::where('name', 'LIKE', '%_transaksi')->get());
                 } else {
                     $role->syncPermissions(Permission::where('name', 'LIKE', 'view_%')->get());
                 }
@@ -94,6 +97,38 @@ class DatabaseSeeder extends Seeder
             $user->email 	 = "admin@example.com";
             $user->password  = bcrypt("admin");
             $user->save();
+
+            $user->assignRole($role->name);
+        } elseif ($role->name == 'Customer') {
+            $user 			 = new User();
+            $user->name 	 = "Customer 1";
+            $user->username  = "customer1";
+            $user->email 	 = "customer1@example.com";
+            $user->password  = bcrypt("customer1");
+            $user->save();
+
+            $user->assignRole($role->name);
+
+            Customer::create([
+                'user_id' => $user->id,
+                'nama'    => $user->name,
+                'alamat'  => 'Surabaya',
+                'telepon' => '111111111111',
+            ]);
+
+            $user 			 = new User();
+            $user->name 	 = "Customer 2";
+            $user->username  = "customer2";
+            $user->email 	 = "customer2@example.com";
+            $user->password  = bcrypt("customer2");
+            $user->save();
+
+            Customer::create([
+                'user_id' => $user->id,
+                'nama'    => $user->name,
+                'alamat'  => 'Surabaya',
+                'telepon' => '222222222222',
+            ]);
 
             $user->assignRole($role->name);
         } 

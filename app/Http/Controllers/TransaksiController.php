@@ -3,63 +3,66 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaksi;
+use App\Services\CustomerService;
 use Illuminate\Http\Request;
+use App\Services\TransaksiService;
 
 class TransaksiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $transaksiService, $customerService;
+    public function __construct(TransaksiService $transaksiService, CustomerService $customerService)
+    {
+        $this->transaksiService = $transaksiService;
+        $this->customerService  = $customerService;
+    }
+
+    // ================ DEFAULT LARAVEL ================ //
     public function index()
     {
-        //
+        return view('transaksi.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return [
+            'kode'     => $this->transaksiService->makeCode(),
+            'customer' => Auth()->user()->hasRole('Super Admin|Admin') ? $this->customerService->viewCombobox(0) : null,
+        ];
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
-        //
+        return $this->transaksiService->store($request);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Transaksi $transaksi)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Transaksi $transaksi)
+    public function edit($id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Transaksi $transaksi)
+    public function update(Request $request, $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Transaksi $transaksi)
     {
         //
+    }
+    // ================ END DEFAULT LARAVEL ================ //
+
+    public function loadData(Request $request)
+    {
+        return $this->transaksiService->viewData($request);
+    }
+
+    public function delete(Request $request)
+    {
+        return $this->transaksiService->delete($request);
     }
 }

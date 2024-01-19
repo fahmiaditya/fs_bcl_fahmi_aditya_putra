@@ -174,7 +174,7 @@ class ArmadaService
 
                 $pagination =
                         '<nav>'.
-                            '<div class="pagination-modal-dosen text-center">'.
+                            '<div class="pagination-modal-armada text-center">'.
                                 $previous.
                                 $next.
                             '</div>'.
@@ -197,6 +197,44 @@ class ArmadaService
         $data['key'] = $id;
 
         return $data;
+    }
+
+    public function viewDataModal($request)
+    {
+        $data       = $this->armadaRepository->getDataViewModal($request);
+        $item_table = $this->itemTableModal($data);
+        $pagination = $this->pagination($data, 1);
+
+        return [
+            'item_table' => $item_table,
+            'pagination' => $pagination
+        ];
+    }
+
+    public function itemTableModal($data)
+    {
+        $item_table = null;
+        if (count($data->items()) > 0) {
+            foreach ($data as $key => $item) {
+                $item_table .=
+                    '<tr>
+                        <td>
+                            <div class="form-check form-check-inline mb-2 form-check-success">
+                                <input id="rb_modal'.$item->id.'" data-kapasitas="'.$item->kapasitas.'" data-armada="'.$item->jenisArmada->nama.' | '.$item->nomor.'" name="rb_modal" class="form-check-input" type="radio" value="'.$item->id.'">
+                                <label class="form-check-label" for="rb_modal'.$item->id.'">&nbsp;</label>
+                            </div>
+                        </td>
+                        <td>'.$data->firstItem() + $key.'</td>
+                        <td>'.$item->jenisArmada->nama.'</td>
+                        <td>'.$item->nomor.'</td>
+                        <td>'.number_format($item->kapasitas, 0, ",", ".").'</td>
+                    </tr>';
+            }
+        } else {
+            $item_table = '<tr><td class="border px-4 py-2 text-center" colspan="8">Empty data</td></tr>';
+        }
+
+        return $item_table;
     }
 
     /* ==========================================================================================================

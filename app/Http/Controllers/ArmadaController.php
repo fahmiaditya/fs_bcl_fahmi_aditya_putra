@@ -27,7 +27,7 @@ class ArmadaController extends Controller
 
     public function create()
     {
-        return $this->jenisArmadaService->viewCombobox();
+        return $this->jenisArmadaService->viewCombobox(0);
     }
 
     public function store(Request $request)
@@ -43,7 +43,7 @@ class ArmadaController extends Controller
     public function edit($id)
     {
         return [
-            'jenis' => $this->jenisArmadaService->viewCombobox(),
+            'jenis' => $this->jenisArmadaService->viewCombobox(0),
             'data'  => $this->armadaService->getDataById($id),
         ];
     }
@@ -67,5 +67,10 @@ class ArmadaController extends Controller
     public function delete(Request $request)
     {
         return $this->armadaService->delete($request);
+    }
+
+    public function loadDataModal(Request $request)
+    {
+        return $this->armadaService->viewDataModal($request);
     }
 }

@@ -63,4 +63,9 @@ class JenisArmadaController extends Controller
     {
         return $this->jenisArmadaService->delete($request);
     }
+
+    public function showCombobox()
+    {
+        return $this->jenisArmadaService->viewCombobox(1);
+    }
 }

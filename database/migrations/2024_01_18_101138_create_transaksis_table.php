@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('lokasi_asal');
             $table->string('lokasi_tujuan');
             $table->bigInteger('ttl_muatan')->default(0);
+            $table->dateTime('tgl_pengiriman')->nullable();
+            $table->dateTime('tgl_tiba')->nullable();
             $table->char('status_pengiriman', 1)->default(0)->comment('0:tertunda 1:dalam perjalanan 2:telah tiba');
             $table->text('deskripsi')->nullable();
             $table->timestamps();

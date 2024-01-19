@@ -194,11 +194,12 @@ class JenisArmadaService
         return $data;
     }
 
-    public function viewCombobox()
+    public function viewCombobox($all)
     {
+        // NOTE ALL 0:TIDAK PAKAI ALL 1:PAKAI ALL
         $data = $this->jenisArmadaRepository->getDataAll();
 
-        $output = '<option value="">Select Category</option>';
+        $output = $all == 0 ? '<option value="">Pilih Jenis Armada</option>' : '<option value="All">Semua</option>';
         foreach ($data as $item) {
             $output .= '<option value="'.$item->id.'">'.$item->nama.'</option>';
         }

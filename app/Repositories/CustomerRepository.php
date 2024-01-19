@@ -24,6 +24,11 @@ class CustomerRepository
                     ->paginate($request->per_page);
     }
 
+    public function getDataAll()
+    {
+        return Customer::all();
+    }
+
     public function getDataById($id)
     {
         return Customer::select('customers.*', 'users.username', 'users.email')
