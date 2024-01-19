@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('barang');
             $table->integer('muatan')->default(0);
             $table->timestamps();
+
+            $table->foreign('transaksi_id')->references('id')
+                ->on('transaksis')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 

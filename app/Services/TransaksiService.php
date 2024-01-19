@@ -74,6 +74,7 @@ class TransaksiService
                         <td>'.$item->kode.'</td>
                         <td>'.$item->customer->nama.'</td>
                         <td>'.$item->armada->jenis_armada.' | <b>'.$item->armada->nomor.'</b></td>
+                        <td>'.Carbon::parse($item->tgl_pemesanan)->translatedFormat('d M Y H:i:s').'</td>
                         <td>'.$item->lokasi_asal.'</td>
                         <td>'.$item->lokasi_tujuan.'</td>
                         <td>'.$status.'</td>

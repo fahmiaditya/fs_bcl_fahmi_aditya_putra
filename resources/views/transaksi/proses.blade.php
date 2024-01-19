@@ -31,6 +31,11 @@
         </div>
 
         <div class="mb-3">
+            <label for="tgl_pemesanan" class="form-label">Tanggal Pemesanan <span class="text-danger">*</span></label>
+            <input class="form-control" type="date" id="tgl_pemesanan" name="tgl_pemesanan" readonly>
+        </div>
+
+        <div class="mb-3">
             <label for="nomor" class="form-label">Barang <span class="text-danger">*</span> <small id="view-max-muatan"></small></label>
             <div id="view-barang">
                 <div class="input-group">

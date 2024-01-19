@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Transaksi;
+use App\Models\TransaksiDetail;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class TransaksiRepository
@@ -31,13 +33,28 @@ class TransaksiRepository
 
     public function store($request)
     {
-        Transaksi::create([
+        $tgl_pemesanan = new Carbon($request->tgl_pemesanan);
+        $trans = Transaksi::create([
             'kode'          => $request->kode,
             'armada_id'     => $request->armada_id,
             'customer_id'   => $request->customer,
             'lokasi_asal'   => $request->lokasi_asal,
             'lokasi_tujuan' => $request->lokasi_tujuan,
             'ttl_muatan'    => $request->ttl_muatan,
+            'tgl_pemesanan' => $tgl_pemesanan->format('Y-m-d H:i:s'),
         ]);
+
+        $this->storeDetail($request, $trans);
+    }
+
+    public function storeDetail($request, $trans)
+    {
+        foreach ($request->barang as $key => $item) {
+            TransaksiDetail::create([
+                'transaksi_id' => $trans->id,
+                'barang'       => $item,
+                'muatan'       => $request->muatan[$key],
+            ]);
+        }
     }
 }

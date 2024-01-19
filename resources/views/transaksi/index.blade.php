@@ -53,6 +53,7 @@
                                                     <th>Kode</th>
                                                     <th>Customer</th>
                                                     <th>Armada</th>
+                                                    <th>Tgl Pemesanan</th>
                                                     <th>Lokasi Asal</th>
                                                     <th>Lokasi Tujuan</th>
                                                     <th>Status Pengiriman</th>
@@ -81,11 +82,25 @@
 @section('css-template')
     <!-- Responsive Table css -->
     <link href="{{ asset('backend/assets/libs/admin-resources/rwd-table/rwd-table.min.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Plugins css -->
+    <link href="{{ asset('backend/assets/libs/spectrum-colorpicker2/spectrum.min.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ asset('backend/assets/libs/flatpickr/flatpickr.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('backend/assets/libs/clockpicker/bootstrap-clockpicker.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('backend/assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
 @endsection
 
 @section('script-template')
     <!-- Plugin js-->
     <script src="{{ asset('backend/assets/libs/admin-resources/rwd-table/rwd-table.min.js') }}"></script>
+
+    <script src="{{ asset('backend/assets/libs/flatpickr/flatpickr.min.js') }}"></script>
+    <script src="{{ asset('backend/assets/libs/spectrum-colorpicker2/spectrum.min.js') }}"></script>
+    <script src="{{ asset('backend/assets/libs/clockpicker/bootstrap-clockpicker.min.js') }}"></script>
+    <script src="{{ asset('backend/assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+
+    <!-- Init js-->
+    <script src="{{ asset('backend/assets/js/pages/form-pickers.init.js') }}"></script>
 @endsection
 
 @section('script-custom')

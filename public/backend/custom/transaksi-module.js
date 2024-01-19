@@ -67,10 +67,18 @@ function formIndex(tipe) {
 
 function resetForm() {
     // FORM PROSES
-    modul_proses.find('#nama').val('');
-    modul_proses.find('#nomor').val('');
-    modul_proses.find('#kapasitas').val(0);
-    modul_proses.find('[name="ketersediaan"][value="1"]').prop('checked', true);
+    modul_proses.find('#armada').val('');
+    modul_proses.find('#armada_id').val('');
+    modul_proses.find('#armada_kapasitas').val('');
+    modul_proses.find('#view-barang').html(
+        '<div class="input-group">'+
+            '<input readonly type="text" name="barang[]" class="form-control" placeholder="Nama Barang"/>'+
+            '<input readonly type="text" name="muatan[]" class="form-control" placeholder="Perkiraan Muatan"/>'+
+            '<button disabled id="btn-add-barang" onclick="addBarang()" class="btn input-group-text btn-dark waves-effect waves-light" type="button"><i class="fe-plus"></i></button>'+
+        '</div>'
+    );
+    modul_proses.find('#lokasi_asal').val('');
+    modul_proses.find('#lokasi_tujuan').val('');
     // END FORM PROSES
 
     // DEFAULT
@@ -94,6 +102,13 @@ function printErrorMsg (msg) {
        $("#error-"+key).html(value);
     });
 }
+
+modul_proses.find("#tgl_pemesanan").flatpickr({
+    // dateFormat: "d-m-Y",
+    enableTime: !0,
+    minDate: new Date(),
+    defaultDate: new Date(),
+});
 
 /* ======================================================================================================
 ------------------------------------------------- EVENT -------------------------------------------------
