@@ -10,9 +10,9 @@
             @if (Auth()->user()->hasRole('Super Admin|Admin'))
                 <select class="form-control" id="customer" name="customer" data-toggle="select2" data-width="100%">
                 </select>
-            @else
+            @elseif (Auth()->user()->hasRole('Customer'))
                 <input type="text" id="customer_name" name="customer_name" class="form-control" value="{{ Auth()->user()->name }}" readonly/>
-                <input hidden type="text" id="customer" name="customer" class="form-control" value="{{ Auth()->user()->customer->nama }}" readonly/>
+                <input hidden type="text" id="customer" name="customer" class="form-control" value="{{ Auth()->user()->customer->id }}" readonly/>
             @endif
 
             <small id="error-customer" class="text-danger msg-error"></small>
@@ -22,8 +22,8 @@
             <label for="armada_id" class="form-label">Pilih Armada <span class="text-danger">*</span></label>
             <div class="input-group">
                 <input readonly type="text" id="armada" name="armada" class="form-control" placeholder="Pilih Armada" aria-label="Pilih Armada">
-                <input readonly hidden type="text" id="armada_id" name="armada_id" class="form-control">
-                <input readonly hidden type="text" id="armada_kapasitas" name="armada_kapasitas" class="form-control">
+                <input hidden type="text" id="armada_id" name="armada_id" class="form-control">
+                <input hidden type="text" id="armada_kapasitas" name="armada_kapasitas" class="form-control">
                 <button onclick="showModalArmada()" class="btn input-group-text btn-dark waves-effect waves-light" type="button"><i class="fe-search"></i></button>
             </div>
 

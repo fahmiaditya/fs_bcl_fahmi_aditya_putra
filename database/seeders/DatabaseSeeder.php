@@ -37,10 +37,10 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Default Permissions added.');
 
         // Confirm roles needed
-        if ($this->command->confirm('Create Roles for user, default is Super Admin, Admin, Customer ? [y|N]', true)) {
+        if ($this->command->confirm('Create Roles for user, default is Super Admin, Admin, Customer, Armada ? [y|N]', true)) {
 
             // Ask for roles from input
-            $input_roles = $this->command->ask('Enter roles in comma separate format.', 'Super Admin, Admin, Customer');
+            $input_roles = $this->command->ask('Enter roles in comma separate format.', 'Super Admin, Admin, Customer, Armada');
 
             // Explode roles
             $roles_array = explode(',', $input_roles);
@@ -59,6 +59,9 @@ class DatabaseSeeder extends Seeder
                     $this->command->info('Kadep granted all the permissions');
                 } elseif ($role->name == 'Customer') {
                     $role->syncPermissions(Permission::where('name', 'LIKE', '%_transaksi')->get());
+                } elseif ($role->name == 'Armada') {
+                    $role->syncPermissions(Permission::where('name', 'LIKE', 'view_transaksi')->get());
+                    $role->syncPermissions(Permission::where('name', 'LIKE', 'edit_transaksi')->get());
                 } else {
                     $role->syncPermissions(Permission::where('name', 'LIKE', 'view_%')->get());
                 }

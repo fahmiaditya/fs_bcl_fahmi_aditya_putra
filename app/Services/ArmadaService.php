@@ -247,6 +247,9 @@ class ArmadaService
         $rules['nomor']     = 'required|min:2|unique:armadas,nomor';
         $rules['jenis']     = 'required';
         $rules['kapasitas'] = 'required|numeric|min:1';
+        $rules['username']  = 'required|min:2|unique:users,username';
+        $rules['email']     = 'required|email|unique:users';
+        $rules['password']  = 'required|confirmed|min:6';
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -273,9 +276,18 @@ class ArmadaService
         $rules['jenis']     = 'required';
         $rules['kapasitas'] = 'required|numeric|min:1';
         
-        $id = Crypt::decrypt($id);
-        if ($this->armadaRepository->getDataById($id)->nomor != $request->nomor) {
+        $id     = Crypt::decrypt($id);
+        $armada = $this->armadaRepository->getDataById($id);
+        if ($armada->nomor != $request->nomor) {
             $rules['nomor'] = 'required|min:2|unique:armadas,nomor';
+        }
+
+        if ($armada->username != $request->username) {
+            $rules['username'] = 'required|min:2|unique:users,username';
+        }
+
+        if ($armada->email != $request->email) {
+            $rules['email']    = 'required|email|unique:users';
         }
 
         $validator = Validator::make($request->all(), $rules);

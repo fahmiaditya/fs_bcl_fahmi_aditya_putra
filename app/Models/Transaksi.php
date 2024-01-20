@@ -19,4 +19,9 @@ class Transaksi extends Model
     {
         return $this->belongsTo(Armada::class, 'armada_id');
     }
+
+    public function detail()
+    {
+        return $this->hasMany(TransaksiDetail::class);
+    }
 }

@@ -43,6 +43,7 @@ function formIndex(tipe) {
 
             // EVENT FORM PROSES
                 // jika ada event di form proses
+                modul_proses.find('#group-password').attr('hidden', false);
             // END EVENT FORM PROSES
         } else {
             // DEFAULT INDEX
@@ -54,6 +55,7 @@ function formIndex(tipe) {
 
             // EVENT FORM PROSES
                 // jika ada event di form proses
+                modul_proses.find('#group-password').attr('hidden', true);
             // END EVENT FORM PROSES
         }
 
@@ -70,6 +72,10 @@ function resetForm() {
     modul_proses.find('#nomor').val('');
     modul_proses.find('#kapasitas').val(0);
     modul_proses.find('[name="ketersediaan"][value="1"]').prop('checked', true);
+    modul_proses.find('#username').val('');
+    modul_proses.find('#email').val('');
+    modul_proses.find('#password').val('');
+    modul_proses.find('#password_confirmation').val('');
     // END FORM PROSES
 
     // DEFAULT
@@ -247,6 +253,9 @@ function edit(url) {
         modul_proses.find('#jenis').val(resp.data.jenis_armada_id);
         modul_proses.find('#kapasitas').val(resp.data.kapasitas);
         modul_proses.find('[name="ketersediaan"][value="'+resp.data.ketersediaan+'"]').prop('checked', true);
+        modul_proses.find('#nama').val(resp.data.nama);
+        modul_proses.find('#username').val(resp.data.username);
+        modul_proses.find('#email').val(resp.data.email);
 
         formIndex(2);
     }).fail(function (e) {

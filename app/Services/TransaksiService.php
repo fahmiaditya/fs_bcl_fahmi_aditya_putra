@@ -41,8 +41,11 @@ class TransaksiService
         $item_table = null;
         if (count($data->items()) > 0) {
             foreach ($data as $key => $item) {
-                $parameter    = Crypt::encrypt($item->id);
-                $url_update   = $this->itemFormatOnClick(route('transaksi.update', $parameter).'/edit');
+                $parameter         = Crypt::encrypt($item->id);
+                $url_update        = $this->itemFormatOnClick(route('transaksi.update', $parameter));
+                $url_lokasi        = $this->itemFormatOnClick(route('transaksi.loadLokasi', $parameter));
+                $url_update_lokasi = $this->itemFormatOnClick(route('transaksi.update-lokasi', $parameter));
+                $url_detail        = $this->itemFormatOnClick(route('transaksi.load-detail', $parameter));
                 
                 if ($item->status_pengiriman == 0) {
                     $status = '<span class="badge badge-outline-danger rounded-pill">Tertunda</span>';
@@ -52,15 +55,36 @@ class TransaksiService
                     $status = '<span class="badge badge-outline-success rounded-pill">Telah Tiba</span>';
                 }
 
-                // PENGECEKAN HAK AKSES EDIT DI IZINKAN
-                $btn_update = '-';
-                if (Auth()->user()->can('edit_transaksi')) {
-                    $btn_update = '<button onclick="edit('.$url_update.')" class="btn btn-success btn-sm btn-ubah">Ubah</button>';
+                // DETAIL BARANG
+                $detail_barang = '';
+                foreach ($item->detail as $item_detail) {
+                    $detail_barang .= '<li>'.$item_detail->barang.' | <small>Muatan</small> : '.$item_detail->muatan.'</li>';
                 }
 
-                $btn_pengiriman = '';
+                // PENGECEKAN HAK AKSES BUTTON
+                // $btn_update        = '';
+                $btn_pengiriman    = '';
+                $btn_update_lokasi = '';
+                $btn_detail        = '';
+                $tgl_pemesanan     = $this->itemFormatOnClick($item->tgl_pemesanan);
+                $tgl_pengiriman    = $this->itemFormatOnClick($item->tgl_pengiriman);
+                $tgl_tiba          = $this->itemFormatOnClick($item->tgl_tiba);
+                $deskripsi         = $this->itemFormatOnClick($item->deskripsi);
+
+                if (Auth()->user()->can('edit_transaksi')) {
+                    if (Auth()->user()->hasRole('Super Admin|Admin|Customer')) {
+                        // $btn_update = '<button onclick="edit('.$url_update.')" class="btn btn-success btn-sm btn-ubah">Ubah</button>';
+                        $btn_detail = '<button onclick="showModalDetail('.$url_detail.')" class="btn btn-warning btn-sm btn-ubah mt-1">Detail</button>';
+                    }
+                }
+
                 if (Auth()->user()->hasRole('Super Admin|Admin')) {
-                    $btn_pengiriman = '<button class="btn btn-primary btn-sm btn-ubah mt-1">Pengiriman</button>';
+                    $btn_pengiriman    = '<button onclick="showModalPengiriman('.$url_update.', '.$tgl_pemesanan.', '.$tgl_pengiriman.', '.$tgl_tiba.', '.$this->itemFormatOnClick($detail_barang).', '.$item->status_pengiriman.', '.$deskripsi.', '.$item->armada_id.')" class="btn btn-primary btn-sm btn-ubah mt-1">Pengiriman</button>';
+                    $btn_update_lokasi = '<button onclick="showModalLokasi('.$url_lokasi.', '.$url_update_lokasi.')" class="btn btn-secondary btn-sm btn-ubah mt-1">Update Lokasi</button>';
+                }
+
+                if (Auth()->user()->hasRole('Armada')) {
+                    $btn_update_lokasi = '<button onclick="showModalLokasi('.$url_lokasi.', '.$url_update_lokasi.')" class="btn btn-secondary btn-sm btn-ubah mt-1">Update Lokasi</button>';
                 }
 
                 $item_table .=
@@ -78,10 +102,10 @@ class TransaksiService
                         <td>'.$item->lokasi_asal.'</td>
                         <td>'.$item->lokasi_tujuan.'</td>
                         <td>'.$status.'</td>
-                        <td>-</td>
                         <td>
-                            '.$btn_update.'
+                            '.$btn_detail.'
                             '.$btn_pengiriman.'
+                            '.$btn_update_lokasi.'
                         </td>
                     </tr>';
             }
@@ -212,10 +236,32 @@ class TransaksiService
     public function getDataById($id)
     {
         $data_id     = Crypt::decrypt($id);
-        $data        = $this->armadaRepository->getDataById($data_id);
+        $data        = $this->transaksiRepository->getDataById($data_id);
         $data['key'] = $id;
 
+        $tgl_kirim   = $data->tgl_pengiriman ? Carbon::parse($data->tgl_pengiriman)->translatedFormat('l, d M Y H:i:s') : 'Data Kosong';
+        $tgl_tiba    = $data->tgl_tiba ? Carbon::parse($data->tgl_tiba)->translatedFormat('l, d M Y H:i:s') : 'Data Kosong';
+        $view_barang = $this->viewDetailBarang($data->detail); 
+
+        $data['view_tgl_kirim']     = $tgl_kirim;
+        $data['view_tgl_tiba']      = $tgl_tiba;
+        $data['view_barang']        = $view_barang;
+        $data['view_lokasi_update'] = $data->lokasi_update ? $data->lokasi_update : '<div class="border text-center">Data Kosong</div>'; 
+
         return $data;
+    }
+
+    public function viewDetailBarang($barang)
+    {
+        $output = '';
+        foreach ($barang as $item) {
+            $output .= '<tr>
+                            <td>'.$item->barang.'</td>
+                            <td>'.$item->muatan.'</td>
+                        </tr>';
+        }
+
+        return $output;
     }
 
     public function makeCode()
@@ -270,6 +316,50 @@ class TransaksiService
             try {
                 $this->transaksiRepository->store($request);
                 $this->armadaRepository->updateKetersediaan($request->armada_id, 0);
+                
+                DB::commit();
+                return ['result' => Response::HTTP_CREATED];
+            } catch (\Exception $e) {
+                DB::rollback();
+                throw $e;
+            }
+        }
+
+        return [
+            'error' => $validator->errors(),
+        ];
+    }
+
+    public function update($request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $id = Crypt::decrypt($id);
+            $this->transaksiRepository->update($request, $id);
+
+            if ($request->status == 2) {
+                $this->armadaRepository->updateKetersediaan($request->armada, 1);
+            }
+            
+            DB::commit();
+            return ['result' => Response::HTTP_CREATED];
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    public function updateLokasi($request, $id)
+    {
+        $rules = [];
+        $rules['lokasi_update'] = 'required';
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->passes()) {
+            DB::beginTransaction();
+            try {
+                $id = Crypt::decrypt($id);
+                $this->transaksiRepository->updateLokasi($request, $id);
                 
                 DB::commit();
                 return ['result' => Response::HTTP_CREATED];

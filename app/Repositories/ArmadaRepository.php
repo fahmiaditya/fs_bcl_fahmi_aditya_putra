@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Armada;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class ArmadaRepository
 {
@@ -33,12 +35,25 @@ class ArmadaRepository
 
     public function getDataById($id)
     {
-        return Armada::with('jenisArmada')->find($id);
+        return Armada::select('*', DB::raw('(select username from users u where u.id = armadas.user_id) as username'),
+            DB::raw('(select email from users u where u.id = armadas.user_id) as email'), 
+            DB::raw('(select name from users u where u.id = armadas.user_id) as nama')
+        )->with('jenisArmada')->find($id);
     }
 
     public function store($request)
     {
+        $user = User::create([
+            'name'     => $request->nama,
+            'username' => trim($request->username),
+            'email'    => $request->email,
+            'password' => bcrypt($request->password),
+        ]);
+
+        $user->syncRoles('Armada');
+
         Armada::create([
+            'user_id'         => $user->id,
             'jenis_armada_id' => $request->jenis,
             'nomor'           => $request->nomor,
             'kapasitas'       => $request->kapasitas,
@@ -48,11 +63,17 @@ class ArmadaRepository
 
     public function update($request, $id)
     {
-        Armada::find($id)->update([
-            'jenis_armada_id' => $request->jenis,
-            'nomor'           => $request->nomor,
-            'kapasitas'       => $request->kapasitas,
-            'ketersediaan'    => $request->ketersediaan,
+        $armada = Armada::find($id);
+        $armada->jenis_armada_id = $request->jenis;
+        $armada->nomor           = $request->nomor;
+        $armada->kapasitas       = $request->kapasitas;
+        $armada->ketersediaan    = $request->ketersediaan;
+        $armada->save();
+
+        User::where('id', $armada->user_id)->update([
+            'name'     => $request->nama,
+            'username' => trim($request->username),
+            'email'    => $request->email,
         ]);
     }
 

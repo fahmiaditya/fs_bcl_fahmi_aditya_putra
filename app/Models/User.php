@@ -49,4 +49,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Customer::class);
     }
+
+    public function armada()
+    {
+        return $this->hasOne(Armada::class);
+    }
 }

@@ -48,4 +48,7 @@ Route::group(['middleware' => 'auth', 'prefix' => '/'], function ()
     Route::resource('/transaksi', TransaksiController::class);
     Route::post('/transaksi/load-data', [TransaksiController::class, 'loadData'])->name('transaksi.load-data');
     Route::post('/transaksi/delete', [TransaksiController::class, 'delete'])->name('transaksi.delete')->middleware(['permission:delete_transaksi']);
+    Route::post('/transaksi/load-lokasi/{id}', [TransaksiController::class, 'loadLokasi'])->name('transaksi.loadLokasi');
+    Route::post('/transaksi/update-lokasi/{id}', [TransaksiController::class, 'updateLokasi'])->name('transaksi.update-lokasi');
+    Route::post('/transaksi/load-detail/{id}', [TransaksiController::class, 'loadDetail'])->name('transaksi.load-detail');
 });

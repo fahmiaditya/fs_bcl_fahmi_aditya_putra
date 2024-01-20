@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaksi;
-use App\Services\CustomerService;
 use Illuminate\Http\Request;
+use App\Services\CustomerService;
 use App\Services\TransaksiService;
 
 class TransaksiController extends Controller
@@ -47,7 +47,7 @@ class TransaksiController extends Controller
 
     public function update(Request $request, $id)
     {
-        //
+        return $this->transaksiService->update($request, $id);
     }
 
     public function destroy(Transaksi $transaksi)
@@ -64,5 +64,20 @@ class TransaksiController extends Controller
     public function delete(Request $request)
     {
         return $this->transaksiService->delete($request);
+    }
+
+    public function loadLokasi($id)
+    {
+        return $this->transaksiService->getDataById($id)->lokasi_update;
+    }
+
+    public function updateLokasi(Request $request, $id)
+    {
+        return $this->transaksiService->updateLokasi($request, $id);
+    }
+
+    public function loadDetail($id)
+    {
+        return $this->transaksiService->getDataById($id);
     }
 }
