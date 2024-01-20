@@ -373,4 +373,28 @@ class TransaksiService
             'error' => $validator->errors(),
         ];
     }
+
+    public function delete($request)
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($request->id as $item_id) {
+                $id = Crypt::decrypt($item_id);
+                $trans = $this->transaksiRepository->getDataById($id);
+
+                if ($trans->status_pengiriman == 0) {
+                    $this->armadaRepository->updateKetersediaan($trans->armada_id, 1);
+                    $this->transaksiRepository->delete($id);
+                } else {
+                    return ['result' => Response::HTTP_UNAVAILABLE_FOR_LEGAL_REASONS];
+                }
+            }
+
+            DB::commit();
+            return ['result' => Response::HTTP_OK];
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
 }

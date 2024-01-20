@@ -91,4 +91,9 @@ class TransaksiRepository
     {
         Transaksi::find($id)->update(['lokasi_update' => $request->lokasi_update]);
     }
+
+    public function delete($id)
+    {
+        Transaksi::destroy($id);
+    }
 }

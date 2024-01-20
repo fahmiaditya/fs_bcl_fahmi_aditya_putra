@@ -528,3 +528,98 @@ function updateLokasi() {
         }
     });
 }
+
+/* ==========================================================================================================
+------------------------------------------------- DELETE DATA -----------------------------------------------
+===========================================================================================================*/
+modul_layout.find("#checkAll").click(function () {
+    modul_layout.find('.cb_id').not(this).prop('checked', this.checked);
+    var cb_checked = $('.cb_id:checked').length;
+
+    if (cb_checked > 0) {
+        modul_layout.find('#limo-btn-hapus').attr('disabled', false);
+        modul_layout.find('#count-hapus').html(cb_checked);
+    } else {
+        modul_layout.find('#limo-btn-hapus').attr('disabled', true);
+        modul_layout.find('#count-hapus').html(0);
+    }
+});
+
+function cb_click() {
+    var cb_checked = $('.cb_id:checked').length;
+    var per_page   = count_page;
+
+    if (cb_checked > 0) {
+        if (cb_checked == per_page) {
+            modul_layout.find('#checkAll').prop('checked', true);
+        } else {
+            modul_layout.find('#checkAll').prop('checked', false);
+        }
+
+        $('#limo-btn-hapus').attr('disabled', false);
+        modul_layout.find('#count-hapus').html(cb_checked);
+    } else {
+        $('#limo-btn-hapus').attr('disabled', true);
+        modul_layout.find('#count-hapus').html(0);
+    }
+}
+
+function hapus(url) {
+    var formData = new FormData();
+
+    modul_layout.find(".cb_id:checked").each(function(){
+        formData.append("id[]", $(this).val());
+    });
+
+    Swal.fire({
+        title: "<span style='color:black;'>Anda yakin menghapus data ini ?</span>",
+        text: "Data tidak dapat dikembalikan lagi !",
+        icon: "warning",
+        showCancelButton: !0,
+        confirmButtonColor: "#28bb4b",
+        cancelButtonColor: "#f34e4e",
+        confirmButtonText: "Ya, Hapus !"
+    }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                method: 'post',
+                url: url,
+                processData: false,
+                contentType: false,
+                data: formData,
+                beforeSend: function () { // Before we send the request, remove the .hidden class from the spinner and default to inline-block.
+                    modul_layout.find('#loading').attr('hidden', false);
+                },
+                success: function (resp) {
+                    if (resp.result == 200) {
+                        Swal.fire({
+                            position: "center",
+                            icon: "success",
+                            title: "<span style='color:black;'>Data berhasil dihapus</span>",
+                            showConfirmButton: !1,
+                            timer: 1500
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "<i style='color:black'>Oops...</i>",
+                            html: "Data gagal dihapus, yang hanya bisa dihapus adalah data dengan status pengiriman ditunda.",
+                        })
+                    }
+                },
+                complete: function () { // Set our complete callback, adding the .hidden class and hiding the spinner.
+                    modul_layout.find('#loading').attr('hidden', true);
+                    loadData(url_first);
+                },
+                error: function(e) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "<i style='color:black'>Oops...</i>",
+                        html: "<i>Something went wrong!</i> <br> "+e.responseJSON.message
+                    })
+                }
+            });
+        }
+    });
+}

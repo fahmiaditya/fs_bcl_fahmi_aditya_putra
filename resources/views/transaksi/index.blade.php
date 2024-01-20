@@ -28,22 +28,25 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <div id="group_button" class="mb-3">
-                                        <h5 class="card-title text-secondary text-center">PROSES DATA</h5>
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="mb-2">
-                                                    <button id="limo-btn-tambah" type="button" onclick="create('{{ route('transaksi.create') }}')" class="btn btn-primary btn-sm waves-effect waves-light form-control">Tambah</button>
-                                                </div>
+                                        @canany(['add_transaksi', 'delete_transaksi'])
+                                            <h5 class="card-title text-secondary text-center">PROSES DATA</h5>
+                                            <div class="row">
+                                                @can('add_transaksi')
+                                                    <div class="col-lg-12">
+                                                        <div class="mb-2">
+                                                            <button id="limo-btn-tambah" type="button" onclick="create('{{ route('transaksi.create') }}')" class="btn btn-primary btn-sm waves-effect waves-light form-control">Tambah</button>
+                                                        </div>
+                                                    </div>
+                                                @endcan
+                                                @can('delete_transaksi')
+                                                    <div class="col-lg-12">
+                                                        <div class="mb-2">
+                                                            <button id="limo-btn-hapus" disabled type="button" onclick="hapus('{{ route('transaksi.delete') }}')" class="btn btn-danger btn-sm waves-effect waves-light form-control">Hapus (<span id="count-hapus">0</span>)</button>
+                                                        </div>
+                                                    </div>
+                                                @endcan
                                             </div>
-                                            <div class="col-lg-12">
-                                                <div class="mb-2">
-                                                    <button id="limo-btn-hapus" disabled type="button" onclick="hapus('{{ route('transaksi.delete') }}')" class="btn btn-danger btn-sm waves-effect waves-light form-control">Hapus (<span id="count-hapus">0</span>)</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {{-- <x-backend.btn-index>
-                                            <x-slot name="entity">transaksi</x-slot>
-                                        </x-backend.btn-index> --}}
+                                        @endcanany
                                     </div>
                                     <div id="group_search" class="mb-3">
                                         <x-backend.search>
